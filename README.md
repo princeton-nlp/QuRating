@@ -1,2 +1,2 @@
-# QuRating
-Select LM Training Data Based on Qualitative Aspects of Text
+# QuRating: Selecting High-Quality Data for Training Language Models
+Code, models and data coming soon...
