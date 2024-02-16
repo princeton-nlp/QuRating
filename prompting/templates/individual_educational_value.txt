@@ -1,0 +1,14 @@
+I need to rate a text excerpt on a scale of {grade_min} to {grade_max} (inclusive) based on its educational value, e.g., it includes clear explanations, step-by-step reasoning, or questions and answers.
+
+Aspects that should NOT influence your judgement:
+1. Which language the text is written in
+2. The length of the text
+
+Note that the text is cut off, so you have to infer its context.
+
+[Text]
+... {text} ...
+
+
+Now assign a number grade between {grade_min} to {grade_max} (inclusive). Respond only with a single digit.
+The score for the quality of the text is:
