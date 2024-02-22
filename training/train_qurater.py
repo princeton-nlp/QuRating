@@ -234,7 +234,7 @@ class PreferenceTrainer(Trainer):
 
         labels = inputs.pop("labels")
         outputs = model(**inputs, use_cache=False)
-        logit_diffs = outputs.logits.unsqueeze(1) - outputs.logits.unsqueeze(0)
+        logit_diffs = outputs.logits.unsqueeze(0) - outputs.logits.unsqueeze(1)
 
         probs = logit_diffs.float().sigmoid()
 
