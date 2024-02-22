@@ -118,8 +118,8 @@ class Grader:
         return {
             "index": indices,
             "text": texts,
-            "predictions": all_scores,
-            "average_prediction": average_scores,
+            "scores": all_scores,
+            "average": average_scores,
         }
 
     def apply(self, dataset):

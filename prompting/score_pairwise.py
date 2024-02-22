@@ -135,8 +135,7 @@ class Comparator:
                 "texts": [texts],
                 "votes_a": [votes_a.tolist()],
                 "votes_b": [votes_b.tolist()],
-                "predictions": [predictions.tolist()],
-                "calibrated_predictions": [calibrated_predictions.tolist()],
+                "average": [calibrated_predictions.tolist()],
             }
         else:
             indices_a, indices_b = np.where(np.triu(np.ones((n, n)), k=1))
