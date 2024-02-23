@@ -123,8 +123,8 @@ class ModelAnnotator:
 
         output = {
             "index": indices,
-            "tokens_in_chunks": chunk_token_counts,
-            "num_tokens": [sum(counts) for counts in chunk_token_counts],
+            "chunk_lengths": chunk_token_counts,
+            "length": [sum(counts) for counts in chunk_token_counts],
         }
 
         for i, label in enumerate(self.labels):
