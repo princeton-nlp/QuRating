@@ -1,6 +1,4 @@
 # QuRating: Selecting High-Quality Data for Training Language Models
-*Documentation, models and data coming very soon...*
-
 This is the official repository for the paper [QuRating: Selecting High-Quality Data for Training Language Models](https://arxiv.org/abs/2402.09739)
 and contains code for (1) collecting LLM quality judgments (2) training QuRater models (3) selecting and sampling data (4) training LMs (5) reproducing the analysis in the paper *(in-progress)*.
 
@@ -11,7 +9,7 @@ and contains code for (1) collecting LLM quality judgments (2) training QuRater 
 <br>
 
 ## Datasets
-* We release the **_250K pairwise GPT-3.5-turbo judgments_** at [princeton-nlp/QuRating-GPT3.5-Judgments](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments) to faciliate data inspection and the training of custom QuRater models. 
+* We release the **_250K pairwise GPT-3.5-turbo judgments_** at [princeton-nlp/QuRating-GPT3.5-Judgments](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments) to faciliate data inspection and the training of custom QuRater models.
   * We provide an additional 7140 pairwise GPT-3.5 judgments within 5 domains for test evaluation at [princeton-nlp/QuRating-GPT3.5-Judgments-Test](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments-Test).
 * To explore the annotated QuRatedPajama, we release a **_1B token subset_** at [princeton-nlp/QuRatedPajama-1B_tokens_for_analysis](https://huggingface.co/datasets/princeton-nlp/QuRatedPajama-1B_tokens_for_analysis).
 This dataset contains normalized quality scores for each criterion and topic cluster assignments for documents from C4 and CommonCrawl. It it used extensively throughout Section 6 of the paper.
@@ -46,3 +44,26 @@ We train 1.3B language models on 30B tokens selected from 260B tokens using diff
   | Inverse Educational Value  | [princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_educational_value-top_k](https://huggingface.co/princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_educational_value-top_k)   | [princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_educational_value-sample_with_temperature1.0](https://huggingface.co/princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_educational_value-sample_with_temperature1.0)   | [princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_educational_value-sample_with_temperature2.0](https://huggingface.co/princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_educational_value-sample_with_temperature2.0)   |
   | Inverse Required Expertise | [princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_required_expertise-top_k](https://huggingface.co/princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_required_expertise-top_k) | [princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_required_expertise-sample_with_temperature1.0](https://huggingface.co/princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_required_expertise-sample_with_temperature1.0) | [princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_required_expertise-sample_with_temperature2.0](https://huggingface.co/princeton-nlp/lm-1.3B-select_30B_tokens_by-inverse_required_expertise-sample_with_temperature2.0) |
 
+## Experiments
+### Installing the Repo
+Setup a new environment and clone this repo, and install the requirements:
+```bash
+pip install -f requirements.txt
+```
+
+### Collecting Judgment Data
+*scripts coming soon*
+
+### Model Training
+*scripts coming soon...*
+
+
+### Citation
+```bibtex
+@article{chevalier2023adapting,
+   title={QuRating: Selecting High-Quality Data for Training Language Models},
+   author={Alexander Wettig, Aatmik Gupta, Saumya Malik, Danqi Chen},
+   journal={arXiv preprint 2402.09739},
+   year={2024}
+}
+```
