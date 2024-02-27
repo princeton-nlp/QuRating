@@ -286,12 +286,27 @@ class PreferenceTrainer(Trainer):
             return loss
 
 
-def load_datasets(dataset_paths, eval_split_size, seed, label_field, num_workers):
+def load_datasets(dataset_paths, eval_split_size, seed, label_field, num_workers, cache_dir):
     train_datasets = {}
     eval_datasets = {}
 
+    loaded_datasets = {}
     for path in dataset_paths:
-        dataset = datasets.load_from_disk(path)
+        if os.path.exists(path + "/state.json"):
+            dataset = datasets.load_from_disk(path)
+        else:
+            dataset = datasets.load_dataset(path, cache_dir=cache_dir)
+
+        if isinstance(dataset, datasets.DatasetDict):
+            if "train" in dataset and len(dataset) == 1:
+                loaded_datasets[path] = dataset["train"]
+            else:
+                for split, ds in dataset.items():
+                    loaded_datasets[f"{path}/{split}"] = ds
+        else:
+            loaded_datasets[path] = dataset
+
+    for path, dataset in loaded_datasets.items():
         if "examples" in dataset.column_names:
             dataset = dataset.remove_columns("examples")
         dataset = dataset.filter(LabelFilter(label_field), num_proc=num_workers, keep_in_memory=True)
@@ -422,7 +437,8 @@ def main():
         args.eval_split_size_train if args.eval_split_size_train is not None else args.eval_split_size,
         training_args.seed,
         args.label_field,
-        training_args.dataloader_num_workers
+        training_args.dataloader_num_workers,
+        cache_dir=args.cache_dir
     )
     train_dataset = datasets.concatenate_datasets(list(train_dataset.values()))
     val_dataset = datasets.concatenate_datasets(list(val_dataset.values()))
@@ -438,7 +454,14 @@ def main():
     )
     logger.warning(f"After confidence filtering - train sequences: {len(train_dataset):,} - validation sequences: {len(val_dataset):,}")
 
-    _, eval_dataset = load_datasets(args.eval_datasets, args.eval_split_size, training_args.seed, args.label_field, training_args.dataloader_num_workers)
+    _, eval_dataset = load_datasets(
+        args.eval_datasets,
+        args.eval_split_size,
+        training_args.seed,
+        args.label_field,
+        training_args.dataloader_num_workers,
+        cache_dir=args.cache_dir
+    )
 
     eval_dataset["all"] = datasets.concatenate_datasets(list(eval_dataset.values()))
     logger.warning(f"All eval sequences: {len(eval_dataset['all']):,}")

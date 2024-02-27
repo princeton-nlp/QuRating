@@ -2,7 +2,6 @@ accelerate==0.22.0
 data-selection==1.0.3
 datasets==2.16.1
 flash-attn==2.3.3
-huggingface-hub==0.20.1
 nltk==3.8.1
 packaging==23.2
 pandas==2.0.3
@@ -17,12 +16,11 @@ regex==2023.10.3
 rotary-emb @ git+https://github.com/Dao-AILab/flash-attention.git@9356a1c0389660d7e231ff3163c1ac17d9e3824a#subdirectory=csrc/rotary
 sentencepiece==0.1.99
 tabulate==0.9.0
-tokenizers==0.14.1
 torch==2.1.1
 torchaudio==2.1.1
 torchvision==0.16.1
 tqdm==4.66.1
-transformers==4.35.0
+transformers==4.36.2
 triton==2.1.0
 tzdata==2023.3
 wandb==0.16.1

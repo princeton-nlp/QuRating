@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from functools import partial
 import math
+import gc
 
 from dataclasses import dataclass, field
 from datasets import Dataset
@@ -161,9 +162,9 @@ class TrainingArguments(HfTrainingArguments):
     ordered: bool = field(
         default=False
     )
-    # per_device_train_tokens: Optional[int] = field(
-    #     default=None
-    # )
+    cuda_empty_cache: bool = field(
+        default=False, metadata={"help": "Empty cuda cache before every step."}
+    )
 
 
 def min_lr_bound(current_step: int, wrapped_func: Callable[[float], float], min_lr_ratio: float, warmup_steps: int):
@@ -327,6 +328,14 @@ class Trainer(HFTrainer):
 
         return (loss, logits, labels, metrics)
 
+    def compute_loss_context_manager(self):
+        """
+        A helper wrapper to group together context managers.
+        """
+        if self.args.cuda_empty_cache:
+            gc.collect()
+            torch.cuda.empty_cache()
+        return self.autocast_smart_context_manager()
 
     def evaluation_loop(
         self,

@@ -26,7 +26,6 @@ from typing import Optional, List
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class ScriptArguments:
     model_name_or_path: Optional[str] = field(
@@ -395,14 +394,17 @@ def main():
         from torch.distributed.fsdp.fully_sharded_data_parallel import BackwardPrefetch
         trainer.accelerator.state.fsdp_plugin.backward_prefetch = BackwardPrefetch.BACKWARD_PRE
 
+        # Identify which modules have "_fsdp_wrap" attribute set to True and wrap these
+        def fsdp_policy_fn(module):
+            return getattr(module, "_fsdp_wrap", False)
+
         # Identify which modules have "layer" in their class name and use these
         # as the basic FSDP blocks that are sharded and exchanged between GPUs
-        def layer_policy_fn(module):
-            return getattr(module, "_fsdp_wrap", False)
+        # def layer_policy_fn(module):
             # return "layer" in module.__class__.__name__.lower()
 
         auto_wrap_policy = functools.partial(lambda_auto_wrap_policy,
-                                             lambda_fn=layer_policy_fn)
+                                             lambda_fn=fsdp_policy_fn)
         trainer.accelerator.state.fsdp_plugin.auto_wrap_policy = auto_wrap_policy
         # trainer.accelerator.state.fsdp_plugin.use_orig_params = True
 
