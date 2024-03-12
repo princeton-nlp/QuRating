@@ -22,7 +22,7 @@ def chunk_with_position(iterable, chunk_size, overlap=0):
         position += len(seg) - overlap
 
 
-def min_char_split(input_string, split_string, min_char):
+def min_char_split(input_string, split_string, min_char, include_separator):
     if not split_string:
         yield input_string
         return
@@ -38,8 +38,12 @@ def min_char_split(input_string, split_string, min_char):
             yield input_string[start:]
             return
 
-        # Add the substring, including the split string, to the results
-        text = input_string[start:index + len(split_string)]
+        # Add the substring to the results
+        if include_separator:
+            text = input_string[start:index + len(split_string)]
+        else:
+            text = input_string[start:index]
+
         if text:
             yield text
         start = index + len(split_string)
@@ -76,13 +80,16 @@ class TokenizeMapper:
                 ids = []
                 for text in texts:
                     if len(text) <= self.args.min_num_chars_for_split:
-                        ids.append(self.tokenizer(text, truncation=False, add_special_tokens=False).input_ids)
+                        chunks = [text]
                     else:
-                        ids.append([
-                            token
-                            for chunk in min_char_split(text, "\n", self.args.min_num_chars_for_split)
-                            for token in self.tokenizer(chunk, truncation=False, add_special_tokens=False).input_ids
-                        ])
+                        chunks = min_char_split(text, self.args.min_num_chars_split_separator, self.args.min_num_chars_for_split, self.args.min_num_chars_include_separator)
+
+
+                    ids.append([
+                        token
+                        for chunk in chunks
+                        for token in self.tokenizer(chunk, truncation=False, add_special_tokens=False).input_ids
+                    ])
             else:
                 ids = self.tokenizer(texts, truncation=False, add_special_tokens=False).input_ids
 
@@ -188,7 +195,9 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42, help="Random seed.")
     parser.add_argument("--json", action="store_true", help="Input is json dataset.")
 
-    parser.add_argument("--min_num_chars_for_split", type=int, help="Split by new line if above this length", default=-1)
+    parser.add_argument("--min_num_chars_for_split", type=int, help="Split input string if above this length", default=-1)
+    parser.add_argument("--min_num_chars_split_separator", type=str, help="Split separator", default=" ")
+    parser.add_argument("--min_num_chars_include_separator", action="store_true", help="Include split separator", default=False)
 
     args = parser.parse_args()
     main(args)
