@@ -9,6 +9,10 @@ from typing import List, Optional, Tuple, Iterable
 import numpy as np
 import numpy.typing as npt
 from tqdm import tqdm
+
+import gc
+
+
 import torch
 from datasets import load_from_disk, load_dataset, concatenate_datasets, Dataset
 
@@ -36,7 +40,7 @@ def selector(dataset_paths: List[str],
                 time.sleep(wait_time)
                 dataset = load_dataset("json", data_files=[path], split="train", download_mode='force_redownload')
         else:
-            dataset = load_from_disk(path)
+            dataset = load_from_disk(path, keep_in_memory=False)
 
         num_rows = len(dataset)
 
@@ -57,6 +61,25 @@ def selector(dataset_paths: List[str],
 
         yield dataset, num_tokens
 
+def datasets_select(datasets: List[Dataset], start: int, end: int):
+    i = 0
+    skipped = 0
+    output = []
+
+    for dataset in datasets:
+        if start > i + len(dataset):
+            i += len(dataset)
+            skipped += len(dataset)
+            continue
+        elif end < i:
+            break
+
+        output.append(dataset)
+        i += len(dataset)
+
+    return maybe_concatenate(output).select(range(start - skipped, end - skipped))
+
+
 
 def sharder(dataset_iterator: Iterable[Tuple[Dataset, int]], tokens_per_shard):
     tokens_in_shard = 0
@@ -67,18 +90,19 @@ def sharder(dataset_iterator: Iterable[Tuple[Dataset, int]], tokens_per_shard):
         current_shard.append(dataset)
 
         if tokens_in_shard >= tokens_per_shard:
-            current_shard = maybe_concatenate(current_shard)
-            num_rows = len(current_shard)
+            # current_shard = maybe_concatenate(current_shard)
+            num_rows = sum(len(ds) for ds in current_shard)
 
             # Assume that the number of tokens per row is roughly the same
             row_splits = [round(t / tokens_in_shard * num_rows) for t in range(0, tokens_in_shard, tokens_per_shard)]
 
             for a, b in zip(row_splits[:-1], row_splits[1:]):
-                yield current_shard.select(range(a, b))
+                yield datasets_select(current_shard, a, b)
                 tokens_in_shard -= tokens_per_shard
 
-            current_shard = [current_shard.select(range(row_splits[-1], num_rows))]
+            current_shard = [datasets_select(current_shard, row_splits[-1], num_rows)]
             tokens_in_shard = round(len(current_shard[0]) / num_rows * tokens_in_shard)
+            gc.collect()
 
     if len(current_shard) > 0 and tokens_in_shard > 0:
         yield maybe_concatenate(current_shard)
@@ -261,7 +285,8 @@ def main(args):
 
     for shard, dataset in enumerate(sharder(dataset_generator, args.tokens_per_shard)):
         print(f"Saving shard {shard}")
-        dataset.save_to_disk(args.output + f"/{shard}", num_proc=args.num_workers)
+        if not os.path.exists(args.output + f"/{shard}/state.json"):
+            dataset.save_to_disk(args.output + f"/{shard}", num_proc=args.num_workers)
     num_shards = shard + 1
 
     print("Renaming shards")
