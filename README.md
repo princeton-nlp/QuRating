@@ -94,7 +94,7 @@ where `--ordered` means that the data is trained on in the same order as found i
 
 ### Citation
 ```bibtex
-@article{chevalier2023adapting,
+@article{wettig2024qurating,
    title={QuRating: Selecting High-Quality Data for Training Language Models},
    author={Alexander Wettig, Aatmik Gupta, Saumya Malik, Danqi Chen},
    journal={arXiv preprint 2402.09739},
