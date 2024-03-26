@@ -11,13 +11,12 @@ and contains code for (1) collecting LLM quality judgments (2) training QuRater 
 ## Datasets
 * We release the **_250K pairwise GPT-3.5-turbo judgments_** at [princeton-nlp/QuRating-GPT3.5-Judgments](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments) to faciliate data inspection and the training of custom QuRater models.
   * We provide an additional 7140 pairwise GPT-3.5 judgments within 5 domains for test evaluation at [princeton-nlp/QuRating-GPT3.5-Judgments-Test](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments-Test).
-* To explore the annotated QuRatedPajama, we release a **_1B token subset_** at [princeton-nlp/QuRatedPajama-1B_tokens_for_analysis](https://huggingface.co/datasets/princeton-nlp/QuRatedPajama-1B_tokens_for_analysis).
+* ‼️  The **_260B token QuRatedPajama_** can be found and downloaded at [princeton-nlp/QuRatedPajama-260B](https://huggingface.co/datasets/princeton-nlp/QuRatedPajama-260B)
+ * To explore the annotated QuRatedPajama, we release a **_1B token subset_** at [princeton-nlp/QuRatedPajama-1B_tokens_for_analysis](https://huggingface.co/datasets/princeton-nlp/QuRatedPajama-1B_tokens_for_analysis).
 This dataset contains normalized quality scores for each criterion and topic cluster assignments for documents from C4 and CommonCrawl. It it used extensively throughout Section 6 of the paper.
 
-*We are currently working on releasing the entire 260B QuRatedPajama set...*
-
 ## Models
-**_‼️ The QuRater model fine-tuned from [ShearedLlama-1.3B](https://huggingface.co/princeton-nlp/Sheared-LLaMA-1.3B) can be found at [princeton-nlp/QuRater-1.3B](https://huggingface.co/princeton-nlp/QuRater-1.3B) on HuggingFace hub ‼️_**
+**_‼️  The QuRater model fine-tuned from [ShearedLlama-1.3B](https://huggingface.co/princeton-nlp/Sheared-LLaMA-1.3B) can be found at [princeton-nlp/QuRater-1.3B](https://huggingface.co/princeton-nlp/QuRater-1.3B) on HuggingFace hub ‼️_**
 
 
 #### Language Models
