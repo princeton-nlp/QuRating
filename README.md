@@ -8,6 +8,11 @@ and contains code for (1) collecting LLM quality judgments (2) training QuRater 
 </p>
 <br>
 
+**_Guidance on Responsible Use_**
+
+In the paper, we document various types of bias that are present in the quality ratings/QuRater model (biases related to domains, topics, social roles, regions and languages - see Section 6 of the paper).
+Hence, be aware that data selection with QuRating could have unintended and harmful effects on the language model that is being trained. We strongly recommend a comprehensive evaluation of the language model for these and other types of bias, particularly before real-world deployment. We hope that releasing the data/models can facilitate future research aimed at uncovering and mitigating such biases.
+
 ## Datasets
 * We release the **_250K pairwise GPT-3.5-turbo judgments_** at [princeton-nlp/QuRating-GPT3.5-Judgments](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments) to faciliate data inspection and the training of custom QuRater models.
   * We provide an additional 7140 pairwise GPT-3.5 judgments within 5 domains for test evaluation at [princeton-nlp/QuRating-GPT3.5-Judgments-Test](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments-Test).
