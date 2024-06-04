@@ -1,5 +1,5 @@
 # QuRating: Selecting High-Quality Data for Training Language Models
-This is the official repository for the paper [QuRating: Selecting High-Quality Data for Training Language Models](https://arxiv.org/abs/2402.09739)
+This is the official repository for our ICML'24 paper [QuRating: Selecting High-Quality Data for Training Language Models](https://arxiv.org/abs/2402.09739)
 and contains code for (1) collecting LLM quality judgments (2) training QuRater models (3) selecting and sampling data (4) training LMs (5) reproducing the analysis in the paper *(in-progress)*.
 
 <br>
@@ -98,10 +98,10 @@ where `--ordered` means that the data is trained on in the same order as found i
 
 ### Citation
 ```bibtex
-@article{wettig2024qurating,
-   title={QuRating: Selecting High-Quality Data for Training Language Models},
-   author={Alexander Wettig, Aatmik Gupta, Saumya Malik, Danqi Chen},
-   journal={arXiv preprint 2402.09739},
+@inproceedings{wettig2024qurating,
+   title={{QuRating}: Selecting High-Quality Data for Training Language Models},
+   author={Wettig, Alexander and Gupta, Aatmik and Malik, Saumya and Chen, Danqi},
+   booktitle={International Conference on Machine Learning (ICML)},
    year={2024}
 }
 ```
