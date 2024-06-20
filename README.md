@@ -83,6 +83,36 @@ BSZ=512 SEQ=4 ./TrainLM.sh
 The script automatically detects the number of GPUs and uses gradient accumulation to achieve a total batch size `BSZ`.
 By default the script downloads the [ShearedLlama-1.3B](https://huggingface.co/princeton-nlp/Sheared-LLaMA-1.3B) and [QuRating-GPT3.5-Judgments](https://huggingface.co/datasets/princeton-nlp/QuRating-GPT3.5-Judgments) dataset from huggingface hub.
 
+## Annotating Data with Quality Ratings
+[qurater_annotate.py](https://github.com/princeton-nlp/QuRating/blob/main/data_tools/qurater_annotate.py) takes a dataset and a QuRater model and adds new columns to the dataset for the quality ratings. Example usage for jsonl documents with a text column (`{"text": "..."}`):
+```
+python -m data_tools.qurater_annotate json <output path for annotated dataset> \
+    -F <path to jsonl files> \
+    -M princeton-nlp/QuRater-1.3B \
+    --text_field text
+    --labels writing_style required_expertise facts_and_trivia educational_value
+```
+The resulting dataset can be inspected via huggingface datasets via `datasets.load_from_disk(...)` and will contain additional columns like `writing_style_chunks` (segment-level quality ratings) and `writing_style_average` (document-level average) for each of the four criteria, similar to the extra columns in [QuRatedPajama-260B](https://huggingface.co/datasets/princeton-nlp/QuRatedPajama-260B).
+The order of these labels in the argument list corresponds to their head index of the QuRater model.
+
+
+## Selecting Data by Quality Ratings
+[select_subset.py](https://github.com/princeton-nlp/QuRating/blob/main/data_tools/select_subset.py) loads input datasets, and perform top-k selection or sampling by treating a column as logits. It selects data until a token budget is reached and requires that the dataset contains a column with number of tokens per entry.
+Here's an example use-case for selecting 1B tokens according to the `educational_value_average` field with temperature 2.0:
+
+```
+python -m data_tools.select_subset <path to annotated dataset> <output path for subset> \
+    --metric_field educational_value_average \
+    --seq_len_field <column name for sequence lengths> \
+    --tokens 1_000_000_000 \
+    --temperature 2.0 \
+    --normalize \
+    --num_workers 8
+```
+where `--normalize` normalizes the mean/std of the metric over the training set. If your data has a domain field, you can select a proportional number of examples from each domain by adding `--domain_field <column name for domain string>`.
+This scripts writes multiple local HF datasets under the output path (useful for large datasets). They can all be read via
+`datasets.concatenate_datasets([datasetes.load_from_disk(ds) for ds in sorted(glob.glob("<output path>/*"))])`
+
 ### Language Model Training
 Run `TrainLM.sh` to train language models:
 ```
