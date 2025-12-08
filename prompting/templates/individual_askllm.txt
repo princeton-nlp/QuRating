@@ -1,0 +1,13 @@
+###
+{text}
+###
+
+Does the previous paragraph demarcated within ### and ###
+contain informative signal for pre-training a large-language model?
+An informative datapoint should be well-formatted, contain some
+usable knowledge of the world, and strictly NOT have any harmful,
+racist, sexist, etc. content.
+
+OPTIONS:
+- yes
+- no

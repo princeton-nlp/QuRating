@@ -14,7 +14,7 @@ class Comparator:
         parser.add_argument("--num_examples_proportion_start", type=float, default=0.0)
 
         parser.add_argument("--seed", type=int, default=42)
-        parser.add_argument("--model", type=str, default="gpt-3.5-turbo", choices=["gpt-3.5-turbo", "gpt-4", "claude-2"])
+        parser.add_argument("--model", type=str, default="gpt-3.5-turbo")
 
         parser.add_argument("-g", "--generations", type=int, default=20)
 
@@ -27,6 +27,7 @@ class Comparator:
         parser.add_argument("--tokens_min", type=int, default=256)
         parser.add_argument("--tokens_max", type=int, default=512)
         parser.add_argument("--probability_tokens_max", type=float, default=0.5)
+        parser.add_argument("--from_start", action="store_true")
         parser.add_argument("--tokenizer", type=str, default="meta-llama/Llama-2-7b-hf")
 
         parser.add_argument("--system_prompt", type=str, default="You are a helpful assistant.")
@@ -66,6 +67,8 @@ class Comparator:
 
         np.random.seed(self.args.seed + index + self.offset)
         start_pos = np.random.randint(0, len(token_ids) - self.args.tokens_max + 1)
+        if self.args.from_start:
+            start_pos = 0
         token_ids = token_ids[start_pos:start_pos + num_tokens]
         return self.tokenizer.decode(token_ids)
 
@@ -113,7 +116,8 @@ class Comparator:
                     self.args.model,
                     system_prompt=self.args.system_prompt,
                     generations=self.args.generations,
-                    labels=self.args.labels)
+                    labels=self.args.labels,
+                    seed=self.args.seed)
 
                 for vote in self.parse_generations(generations):
                     if vote == 0:

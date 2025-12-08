@@ -28,4 +28,6 @@ xxhash==3.4.1
 yarl==1.9.4
 zstandard==0.22.0
 zstd==1.5.5.1
-openai==0.28.1
+openai==1.33.0
+tiktoken==0.7.0
+anthropic==0.28.0

@@ -8,38 +8,43 @@ import json
 from filelock import FileLock
 import random
 
-MODELS = {
-    "gpt-3.5-turbo-16k": {
-        "api_base": "https://pnlpopenai2.openai.azure.com/",
-        "api_type": "azure",
-        "api_version": "2023-05-15",
-        "deployment_name": "gpt-35-turbo-0613",
-        "enc": tiktoken.encoding_for_model("gpt-3.5-turbo"),
-        "prompt_cost_per_token": 0.003 / 1000,
-        "response_cost_per_token": 0.004 / 1000,
-    },
-    "gpt-3.5-turbo": {
-        "api_base": "https://pnlpopenai2.openai.azure.com/",
-        "api_type": "azure",
-        "api_version": "2023-05-15",
-        "deployment_name": "gpt-35-turbo-0613",
-        "enc": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+
+# Costs on Azure as of 2024-06-01. No liability for correctness.
+MODEL_COSTS = {
+    "gpt-3.5-turbo-0613": {
         "prompt_cost_per_token": 0.0015 / 1000,
         "response_cost_per_token": 0.002 / 1000,
     },
-    "gpt-4": {
-        "api_base": "https://pnlpopenai3.openai.azure.com/",
-        "api_type": "azure",
-        "api_version": "2023-05-15",
-        "deployment_name": "gpt-4",
-        "enc": tiktoken.encoding_for_model("gpt-4"),
+    "gpt-3.5-turbo-1106": {
+        "prompt_cost_per_token": 0.001 / 1000,
+        "response_cost_per_token": 0.002 / 1000,
+    },
+    "gpt-4-1106-preview": {
         "prompt_cost_per_token": 0.03 / 1000,
         "response_cost_per_token": 0.06 / 1000,
     },
+    "gpt-4-0125-preview": {
+        "prompt_cost_per_token": 0.03 / 1000,
+        "response_cost_per_token": 0.06 / 1000,
+    },
+    "gpt-4-turbo-2024-04-09": {
+        "prompt_cost_per_token": 0.01 / 1000,
+        "response_cost_per_token": 0.03 / 1000,
+    },
+    "gpt-4o-2024-05-13": {
+        "prompt_cost_per_token": 0.005 / 1000,
+        "response_cost_per_token": 0.015 / 1000,
+    },
 }
 
+# Add Azure shorthands
+for model in list(MODEL_COSTS.keys()):
+    MODEL_COSTS[model.replace("3.5", "35")] = MODEL_COSTS[model]
+
+# Use a separate random for retries to avoid affecting the global state
 RANDOM = random.Random()
 
+client=openai.AzureOpenAI() # Replace with openai.Client() for OpenAI API
 
 def query_openai(prompt: str,
                  model: str,
@@ -47,13 +52,9 @@ def query_openai(prompt: str,
                  system_prompt: str = None,
                  generations: int = 1,
                  retries: int = 1,
-                 log_file_path: int = "openai_api_cost.jsonl") -> List[str]:
-    openai.api_key = os.environ["OPENAI_API_KEY"]
-    openai.api_base = MODELS[model]["api_base"]
-    openai.api_type = MODELS[model]["api_type"]
-    openai.api_version = MODELS[model]["api_version"]
-    deployment_name=MODELS[model]["deployment_name"]
-    enc = MODELS[model]["enc"]
+                 log_file_path: int = "openai_api_cost.jsonl",
+                 seed: int = 42) -> List[str]:
+    enc = tiktoken.encoding_for_model(model)
 
     is_ok = False
     retry_count = 0
@@ -72,13 +73,14 @@ def query_openai(prompt: str,
 
     while not is_ok:
         try:
-            response = openai.ChatCompletion.create(
-                engine=deployment_name, model=deployment_name,
+            response = client.chat.completions.create(
+                model=model,
                 messages=messages,
                 temperature=1.0,
                 max_tokens=max_tokens,
                 n=generations,
                 logit_bias=logit_bias,
+                seed=seed,
             )
             is_ok = True
         except Exception as error:
@@ -94,13 +96,17 @@ def query_openai(prompt: str,
                 print(f"OpenAI API failed for {retry_count} times ({error})")
                 return []
 
-    generations = [choice['message']['content'] for choice in response['choices']]
+    generations = [choice.message.content for choice in response.choices]
 
-    usage = response["usage"]
-    usage["prompt_cost"] = MODELS[model]["prompt_cost_per_token"] * usage["prompt_tokens"]
-    usage["response_cost"] = MODELS[model]["response_cost_per_token"] * usage["completion_tokens"]
-    usage["cost"] = usage["prompt_cost"] + usage["response_cost"]
-    usage["model"] = deployment_name
+    usage = {
+        "prompt_tokens": response.usage.prompt_tokens,
+        "completion_tokens": response.usage.completion_tokens,
+        "model": model,
+    }
+    if model in MODEL_COSTS:
+        usage["prompt_cost"] = MODEL_COSTS[model]["prompt_cost_per_token"] * response.usage.prompt_tokens
+        usage["response_cost"] = MODEL_COSTS[model]["response_cost_per_token"] * response.usage.completion_tokens
+        usage["cost"] = usage["prompt_cost"] + usage["response_cost"]
 
     with FileLock(log_file_path + ".lock"):
         with open(log_file_path, "a") as f:
